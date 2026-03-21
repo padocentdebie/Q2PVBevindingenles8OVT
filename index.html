@@ -3,106 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PV Schrijftrainer: Redenen van Wetenschap</title>
+    <title>PV Schrijftrainer: Specifiek Waarnemen</title>
     <style>
-        body { font-family: 'Arial', sans-serif; background-color: #002344; color: white; display: flex; justify-content: center; padding: 20px; }
-        #game-container { background: white; color: #333; padding: 2rem; border-radius: 8px; width: 100%; max-width: 800px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-        .instruction { background: #eef4f9; padding: 15px; border-left: 5px solid #004481; margin-bottom: 20px; font-size: 0.95rem; }
-        .scenario { font-weight: bold; font-size: 1.1rem; margin-bottom: 15px; color: #004481; }
-        input[type="text"] { width: 100%; padding: 12px; font-size: 1rem; border: 2px solid #ccc; border-radius: 4px; box-sizing: border-box; margin-bottom: 10px; }
-        button { background: #004481; color: white; border: none; padding: 12px 25px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #001d3d; color: #333; display: flex; justify-content: center; padding: 20px; }
+        #game-container { background: white; padding: 2rem; border-radius: 12px; width: 100%; max-width: 850px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+        .header { border-bottom: 3px solid #004481; margin-bottom: 20px; padding-bottom: 10px; }
+        .instruction { background: #f0f7ff; padding: 15px; border-left: 5px solid #ffcc00; margin-bottom: 20px; font-size: 0.95rem; line-height: 1.6; }
+        .scenario { font-weight: bold; font-size: 1.2rem; margin: 20px 0; color: #004481; min-height: 60px; }
+        input[type="text"] { width: 100%; padding: 15px; font-size: 1.1rem; border: 2px solid #bdc3c7; border-radius: 6px; box-sizing: border-box; }
+        .controls { margin-top: 15px; display: flex; gap: 10px; }
+        button { background: #004481; color: white; border: none; padding: 12px 25px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 1rem; }
         button:hover { background: #002344; }
-        #feedback { margin-top: 20px; padding: 15px; border-radius: 4px; display: none; }
+        #feedback { margin-top: 20px; padding: 20px; border-radius: 8px; display: none; line-height: 1.5; }
         .correct { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .wrong { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-        .stats { margin-top: 10px; font-size: 0.8rem; color: #666; }
+        .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .example-box { margin-top: 10px; font-size: 0.9rem; font-style: italic; opacity: 0.8; }
     </style>
 </head>
 <body>
 
 <div id="game-container">
-    <h2>PV Schrijftrainer</h2>
+    <div class="header">
+        <h2 style="margin:0;">PV Schrijftrainer: De OVT-Check</h2>
+        <small>Focus: Redenen van wetenschap & Specificiteit</small>
+    </div>
+
     <div class="instruction">
-        <strong>Opdracht:</strong> Noteer je waarneming als reden van wetenschap. <br>
-        Eis: Gebruik de <strong>ik-vorm</strong> en de <strong>verleden tijd (ovt)</strong>. Schrijf filmisch!
+        <strong>Opdracht:</strong> Schrijf een filmische zin in de <strong>ik-vorm</strong> en <strong>verleden tijd (ovt)</strong>.<br>
+        <strong>Let op:</strong> Wees specifiek! Noem bij voertuigen altijd <strong>kleur, merk of kenteken</strong>. Als dit onbekend is, noteer dan expliciet 'onbekend'.
     </div>
     
     <div id="game-ui">
-        <div class="stats">Situatie <span id="current-idx">1</span> van 30</div>
+        <div id="progress" style="color:#666; font-size: 0.8rem;">Situatie 1 van 30</div>
         <div class="scenario" id="scenario-text">Laden...</div>
-        <input type="text" id="user-input" placeholder="Typ hier je PV-zin..." autocomplete="off">
-        <button onclick="checkAnswer()">Verstuur Waarneming</button>
+        <input type="text" id="user-input" placeholder="Typ je PV-zin hier..." autocomplete="off">
+        
+        <div class="controls">
+            <button onclick="validateInput()">Verbaal opmaken</button>
+            <button id="next-btn" style="display:none; background: #28a745;" onclick="nextQuestion()">Volgende Casus</button>
+        </div>
         
         <div id="feedback"></div>
-        <button id="next-btn" style="display:none; margin-top:10px; background: #28a745;" onclick="nextQuestion()">Volgende situatie</button>
     </div>
 </div>
 
 <script>
-    const exercises = [
-        { q: "Je loopt langs een auto en ruikt een sterke wietlucht.", keywords: ["ik", "rook", "wietlucht"], example: "Ik rook dat er een sterke wietlucht uit de auto kwam." },
-        { q: "Tijdens de veiligheidsfouillering voel je een hard voorwerp in de linker jaszak.", keywords: ["ik", "voelde", "voorwerp"], example: "Ik voelde dat er een hard voorwerp in de linker jaszak zat." },
-        { q: "De verdachte spreekt je aan en je ruikt een sterke alcohollucht.", keywords: ["ik", "rook", "alcohollucht"], example: "Ik rook dat de adem van de verdachte naar alcohol rook." },
-        { q: "Je ziet de verdachte een zilverkleurig voorwerp in de bosjes gooien.", keywords: ["ik", "zag", "gooide"], example: "Ik zag dat de verdachte een zilverkleurig voorwerp in de bosjes wierp." },
-        { q: "Je hoort een luide knal die lijkt op een schot.", keywords: ["ik", "hoorde", "knal"], example: "Ik hoorde dat er een luide knal klonk die geleek op een schot." },
-        { q: "Bij de fouillering voel je een vorm die lijkt op een mes bij de broeksband.", keywords: ["ik", "voelde", "mes"], example: "Ik voelde dat er een voorwerp in de vorm van een mes in de broeksband zat." },
-        { q: "Je ruikt een brandlucht bij het passeren van de voordeur.", keywords: ["ik", "rook", "brandlucht"], example: "Ik rook dat er een sterke brandlucht uit de woning kwam." },
-        { q: "Je ziet dat de bestuurder rode ogen heeft en versuft kijkt.", keywords: ["ik", "zag", "ogen"], example: "Ik zag dat de bestuurder rode ogen had." },
-        { q: "Je hoort glas gerinkel aan de achterzijde van het pand.", keywords: ["ik", "hoorde", "glas"], example: "Ik hoorde dat er glas rinkelde aan de achterzijde van het pand." },
-        { q: "Tijdens de fouillering voel je een zacht zakje met gruis in de broekzak.", keywords: ["ik", "voelde", "zakje"], example: "Ik voelde dat er een klein zacht zakje in de rechterbroekzak zat." },
-        // ... (Aangevuld tot 30 in de logica hieronder)
+    const scenarios = [
+        { q: "Je loopt langs een auto en ruikt een sterke wietlucht.", sensor: "rook", target: "auto", mustInclude: ["wietlucht"], example: "Ik rook dat er een sterke wietlucht uit de blauwe Volkswagen (kenteken onbekend) kwam." },
+        { q: "Tijdens een veiligheidsfouillering voel je een hard voorwerp in de rechter jaszak.", sensor: "voelde", target: "voorwerp", mustInclude: ["hard"], example: "Ik voelde dat er een hard voorwerp in de rechter jaszak van de verdachte zat." },
+        { q: "Je ziet dat een personenauto met hoge snelheid door rood licht rijdt.", sensor: "zag", target: "auto", mustInclude: ["rood"], example: "Ik zag dat de grijze BMW, voorzien van kenteken 12-ABC-3, met hoge snelheid door het rode licht reed." },
+        { q: "De bestuurder spreekt je aan en je ruikt een alcohollucht.", sensor: "rook", target: "adem", mustInclude: ["alcohol"], example: "Ik rook dat de adem van de bestuurder naar alcohol rook." },
+        { q: "Je voelt tijdens de fouillering een zakje met gruis in de broeksband.", sensor: "voelde", target: "zakje", mustInclude: ["gruis"], example: "Ik voelde dat er een klein zakje met gruis in de broeksband stak." },
+        { q: "Je hoort een harde klap bij de grijze personenauto die geparkeerd staat.", sensor: "hoorde", target: "auto", mustInclude: ["klap"], example: "Ik hoorde dat er een harde klap klonk bij de grijze Audi." },
+        { q: "Je ziet een verdacht persoon bij een bestelbus staan.", sensor: "zag", target: "bus", mustInclude: ["persoon"], example: "Ik zag dat er een man bij de witte Mercedes Sprinter stond." },
+        { q: "Je ruikt een wietlucht wanneer de verdachte zijn jas opendoet.", sensor: "rook", target: "jas", mustInclude: ["wietlucht"], example: "Ik rook dat er een sterke wietlucht uit de zwarte gewatteerde jas van de verdachte kwam." },
+        { q: "Tijdens de fouillering voel je een scherp voorwerp in de mouw.", sensor: "voelde", target: "mouw", mustInclude: ["scherp"], example: "Ik voelde dat er een scherp voorwerp in de linkermouw van de jas zat." },
+        { q: "Je ziet de verdachte wegrennen in de richting van een geparkeerde auto.", sensor: "zag", target: "auto", mustInclude: ["rende"], example: "Ik zag dat de verdachte wegrende naar de groene Ford Ka (kenteken onbekend)." }
+        // De lijst kan hier worden aangevuld tot 30...
     ];
 
-    // Dynamische aanvulling voor de demo (vul dit aan met specifieke casussen)
-    while(exercises.length < 30) {
-        exercises.push({ q: "Extra oefensituatie: Je ziet de verdachte wegrennen.", keywords: ["ik", "zag", "rende"], example: "Ik zag dat de verdachte met versnelde pas wegrende." });
+    // Aanvulling tot 30 voor de demo
+    while(scenarios.length < 30) {
+        scenarios.push({ q: "Casus: Je ziet een voertuig wegrijden na een aanrijding.", sensor: "zag", target: "auto", mustInclude: ["reed"], example: "Ik zag dat de rode Fiat Punto met hoge snelheid wegreed." });
     }
 
-    let current = 0;
+    let currentIdx = 0;
 
     function load() {
-        document.getElementById('scenario-text').innerText = exercises[current].q;
-        document.getElementById('current-idx').innerText = current + 1;
+        document.getElementById('scenario-text').innerText = scenarios[currentIdx].q;
+        document.getElementById('progress').innerText = `Situatie ${currentIdx + 1} van 30`;
         document.getElementById('user-input').value = "";
+        document.getElementById('user-input').disabled = false;
         document.getElementById('feedback').style.display = "none";
         document.getElementById('next-btn').style.display = "none";
-        document.getElementById('user-input').disabled = false;
     }
 
-    function checkAnswer() {
+    function validateInput() {
         const input = document.getElementById('user-input').value.toLowerCase();
         const feedback = document.getElementById('feedback');
-        const keys = exercises[current].keywords;
+        const s = scenarios[currentIdx];
         
-        let score = 0;
-        keys.forEach(k => { if(input.includes(k)) score++; });
-
-        // Check op 'ik heb' (foutieve VTT)
-        const isVTT = input.includes("heb") || input.includes("heeft");
-
         feedback.style.display = "block";
-        if (score >= 2 && !isVTT) {
-            feedback.className = "correct";
-            feedback.innerHTML = "<strong>Goed gedaan!</strong> Je gebruikt de ik-vorm en de verleden tijd.<br><small>Voorbeeld: " + exercises[current].example + "</small>";
-        } else {
-            feedback.className = "wrong";
-            let message = "<strong>Let op:</strong> ";
-            if(isVTT) message += "Gebruik geen hulpwerkwoord ('heb'). Schrijf filmisch in de OVT. ";
-            if(!input.includes("ik")) message += "Schrijf vanuit de ik-vorm. ";
-            message += "<br><small>Probeer: " + exercises[current].example + "</small>";
-            feedback.innerHTML = message;
-        }
         
-        document.getElementById('next-btn').style.display = "inline-block";
-        document.getElementById('user-input').disabled = true;
+        // 1. Controle op Ik-vorm en OVT
+        const hasIk = input.includes("ik ");
+        const hasOVT = input.includes(s.sensor);
+        const hasVTT = input.includes("heb") || input.includes("heeft") || input.includes("ben");
+
+        // 2. Controle op specificiteit van voertuig
+        let specificEnough = true;
+        let specificError = "";
+        if (s.target === "auto" || s.target === "bus") {
+            const hasColor = ["blauw", "rood", "grijs", "zwart", "wit", "groen", "geel", "zilver", "bruin"].some(c => input.includes(c));
+            const hasDetail = input.includes("kenteken") || input.includes("onbekend") || input.includes("merk") || input.includes("type");
+            // Als de student alleen 'auto' zegt zonder kleur of kenteken/onbekend
+            if (!hasColor && !hasDetail) {
+                specificEnough = false;
+                specificError = "<strong>Onvoldoende specifiek!</strong> Je noemt 'de auto', maar vermeldt geen kleur, merk of kenteken (of 'onbekend').";
+            }
+        }
+
+        // 3. Resultaat bepalen
+        if (!hasIk || !hasOVT || hasVTT) {
+            feedback.className = "error";
+            feedback.innerHTML = `<strong>Grammaticafout:</strong> Gebruik de ik-vorm en de verleden tijd (<em>${s.sensor}</em>). Gebruik géén hulpwerkwoorden zoals 'heb'.`;
+        } else if (!specificEnough) {
+            feedback.className = "warning";
+            feedback.innerHTML = specificError;
+        } else {
+            feedback.className = "correct";
+            feedback.innerHTML = `<strong>Correct verbaal!</strong> De waarneming is filmisch en specifiek.<br><div class="example-box">Voorbeeld: ${s.example}</div>`;
+            document.getElementById('next-btn').style.display = "inline-block";
+            document.getElementById('user-input').disabled = true;
+        }
     }
 
     function nextQuestion() {
-        current++;
-        if (current < exercises.length) {
+        currentIdx++;
+        if (currentIdx < scenarios.length) {
             load();
         } else {
-            document.getElementById('game-ui').innerHTML = "<h3>Training voltooid!</h3><p>Je hebt alle 30 situaties behandeld. Ga nu aan de slag met een echt proces-verbaal.</p>";
+            document.getElementById('game-ui').innerHTML = "<h2>Einde Training</h2><p>Je hebt alle situaties succesvol en specifiek beschreven in de OVT!</p>";
         }
     }
 
