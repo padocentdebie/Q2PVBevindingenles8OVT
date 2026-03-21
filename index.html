@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PV-Trainer: Redenen van Wetenschap</title>
+    <style>
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #1a2a3a; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        #game-container { background: #ffffff; color: #333; padding: 2.5rem; border-radius: 15px; width: 90%; max-width: 700px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .instruction { font-style: italic; color: #555; margin-bottom: 20px; border-left: 4px solid #004481; padding-left: 10px; }
+        .sentence { font-size: 1.3rem; margin: 30px 0; min-height: 100px; display: flex; align-items: center; justify-content: center; line-height: 1.5; font-weight: 600; }
+        .btn-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        button { padding: 15px; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: bold; transition: all 0.2s; }
+        .btn-correct { background-color: #004481; color: white; }
+        .btn-incorrect { background-color: #e0e0e0; color: #333; }
+        button:hover { opacity: 0.9; transform: translateY(-2px); }
+        #feedback { margin-top: 25px; height: 50px; font-weight: bold; font-size: 1.1rem; }
+        .success { color: #28a745; }
+        .error { color: #d9534f; }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <h2 style="color: #004481; margin-top: 0;">PV-Training: Zintuiglijke Waarneming</h2>
+    <div class="instruction">
+        Herken de juiste <strong>filmische</strong> weergave. Redenen van wetenschap staan in de <strong>ik-vorm</strong> en de <strong>verleden tijd</strong>.
+    </div>
+    <div id="progress">Vraag 1 van 30</div>
+    <div class="sentence" id="sentence-display">Laden...</div>
+    <div class="btn-container">
+        <button class="btn-correct" id="opt1" onclick="check(0)"></button>
+        <button class="btn-incorrect" id="opt2" onclick="check(1)"></button>
+    </div>
+    <div id="feedback"></div>
+</div>
+
+<script>
+    const data = [
+        // ZIEN
+        { q: "Je ziet de verdachte rennen. Hoe noteer je dit filmisch?", a: ["Ik zag dat de verdachte wegrende.", "Ik heb gezien dat de verdachte wegrende."], c: 0 },
+        { q: "Je ziet een vuurwapen op de grond liggen.", a: ["Ik zag dat er een vuurwapen op de grond lag.", "Ik zie dat er een vuurwapen op de grond ligt."], c: 0 },
+        { q: "De verdachte gooit iets weg.", a: ["Ik zag dat de verdachte een voorwerp wegwierp.", "Ik heb de verdachte iets zien weggooien."], c: 0 },
+        
+        // HOREN
+        { q: "Je hoort een luide knal in de verte.", a: ["Ik hoorde dat er een luide knal klonk.", "Ik heb een luide knal gehoord."], c: 0 },
+        { q: "De verdachte schreeuwt een belediging.", a: ["Ik hoorde dat de verdachte riep: 'Krijg de tering'.", "Ik hoor de verdachte beledigingen uiten."], c: 0 },
+        { q: "Je hoort glas gerinkel bij de achterdeur.", a: ["Ik hoorde dat er glas rinkelde bij de achterdeur.", "Ik heb glas horen rinkelen."], c: 0 },
+
+        // VOELEN (Fouillering - 3x)
+        { q: "Tijdens de fouillering voel je een hard voorwerp in de rechterzak.", a: ["Ik voelde dat er een hard voorwerp in de rechterzak zat.", "Ik heb een hard voorwerp in de zak gevoeld."], c: 0 },
+        { q: "Je voelt een vloeistof op de mouw van de verdachte.", a: ["Ik voelde dat de mouw van de verdachte nat was.", "Ik voel dat de mouw nat is."], c: 0 },
+        { q: "Tijdens het insluiten voel je een scherp object in de broeksband.", a: ["Ik voelde dat er een scherp object in de broeksband stak.", "Ik heb een scherp object gevoeld."], c: 0 },
+
+        // RUIKEN (Wiet/Alcohol - 3x)
+        { q: "De bestuurder opent het raam en je ruikt wiet.", a: ["Ik rook dat er een sterke wietlucht uit het voertuig kwam.", "Ik heb een wietlucht geroken."], c: 0 },
+        { q: "De verdachte spreekt met dubbele tong en ruikt naar drank.", a: ["Ik rook dat de adem van de verdachte naar alcohol rook.", "Ik heb een alcohollucht waargenomen."], c: 0 },
+        { q: "Je stapt de woning binnen na een melding overlast.", a: ["Ik rook dat er in de woning een penetrante wietlucht hing.", "Ik ruik dat er een wietlucht hangt."], c: 0 },
+
+        // PROEVEN
+        { q: "Je proeft een bittere substantie op je lippen na een poederwolk.", a: ["Ik proefde dat de substantie bitter was.", "Ik heb een bittere smaak geproefd."], c: 0 },
+        
+        // MIXED SCENARIO'S (Aanvulling tot 30)
+        { q: "De verdachte verzet zich bij de aanhouding.", a: ["Ik voelde dat de verdachte zijn armen wegrok.", "De verdachte heeft zich verzet."], c: 0 },
+        { q: "Een getuige spreekt je aan.", a: ["Ik hoorde dat de getuige mijn naam riep.", "Een getuige heeft mij aangesproken."], c: 0 },
+        { q: "De auto van de verdachte slipt.", a: ["Ik zag dat het voertuig met piepende banden wegreed.", "De auto is weggereden."], c: 0 },
+        { q: "Je controleert de polslag van een slachtoffer.", a: ["Ik voelde dat het slachtoffer een zwakke hartslag had.", "Ik heb de hartslag gevoeld."], c: 0 },
+        { q: "De verdachte ruikt na een achtervolging naar zweet.", a: ["Ik rook dat de verdachte hevig naar zweet rook.", "De verdachte rook naar zweet."], c: 0 },
+        { q: "Je hoort de melding via de portofoon.", a: ["Ik hoorde dat de meldkamer een diefstal met geweld doorgaf.", "De melding is doorgegeven."], c: 0 },
+        { q: "Je ziet een bloedspoor op de vloer.", a: ["Ik zag dat er een vers bloedspoor naar de keuken liep.", "Ik zie een bloedspoor liggen."], c: 0 },
+        { q: "De verdachte ruikt naar benzine bij een brandstichting.", a: ["Ik rook dat de kleding van de verdachte naar benzine rook.", "Ik heb benzine geroken."], c: 0 },
+        { q: "Je voelt de warmte van een draaiende motor.", a: ["Ik voelde dat de motorkap van het voertuig warm was.", "De motorkap voelde warm aan."], c: 0 },
+        { q: "Je ziet de pupillen van de verdachte.", a: ["Ik zag dat de pupillen van de verdachte niet reageerden op licht.", "Ik heb de pupillen bekeken."], c: 0 },
+        { q: "Je hoort de verdachte snikken.", a: ["Ik hoorde dat de verdachte zachtjes huilde.", "Ik heb de verdachte horen huilen."], c: 0 },
+        { q: "Je proeft de rook in een brandend pand.", a: ["Ik proefde dat de lucht vol roet en rook zat.", "De lucht smaakte naar rook."], c: 0 },
+        { q: "Je ziet de verdachte een vuistslag geven.", a: ["Ik zag dat de verdachte het slachtoffer in het gezicht sloeg.", "De verdachte heeft een klap gegeven."], c: 0 },
+        { q: "Je ruikt een chemische lucht in een drugslab.", a: ["Ik rook dat er een sterke chemische lucht in de schuur hing.", "Er hing een chemische lucht."], c: 0 },
+        { q: "Je hoort voetstappen op de trap.", a: ["Ik hoorde dat er iemand de trap op rende.", "Ik heb voetstappen gehoord."], c: 0 },
+        { q: "Je voelt de weerstand van een deur.", a: ["Ik voelde dat de deur van binnenuit werd tegengehouden.", "De deur werd tegengehouden."], c: 0 },
+        { q: "Je ziet de verdachte een mes trekken.", a: ["Ik zag dat de verdachte een mes uit zijn jaszak pakte.", "De verdachte heeft een mes gepakt."], c: 0 }
+    ];
+
+    let current = 0;
+    let score = 0;
+
+    function loadQuestion() {
+        if (current >= data.length) {
+            document.getElementById('game-container').innerHTML = `<h2>Training Voltooid</h2><p>Je hebt ${score} van de 30 situaties correct filmisch beschreven.</p><button onclick="location.reload()" class="btn-correct">Opnieuw</button>`;
+            return;
+        }
+        const item = data[current];
+        document.getElementById('progress').innerText = `Situatie ${current + 1} van 30`;
+        document.getElementById('sentence-display').innerText = item.q;
+        
+        // Randomize options
+        let options = [...item.a];
+        if (Math.random() > 0.5) options.reverse();
+        
+        document.getElementById('opt1').innerText = options[0];
+        document.getElementById('opt2').innerText = options[1];
+        document.getElementById('opt1').onclick = () => check(options[0] === item.a[item.c]);
+        document.getElementById('opt2').onclick = () => check(options[1] === item.a[item.c]);
+    }
+
+    function check(isCorrect) {
+        const fb = document.getElementById('feedback');
+        if (isCorrect) {
+            score++;
+            fb.innerHTML = "<span class='success'>Correct! OVT + Ik-vorm = Filmisch PV.</span>";
+        } else {
+            fb.innerHTML = "<span class='error'>Fout. Gebruik de verleden tijd (OVT) voor directe waarnemingen.</span>";
+        }
+        current++;
+        setTimeout(() => {
+            fb.innerHTML = "";
+            loadQuestion();
+        }, 1200);
+    }
+
+    loadQuestion();
+</script>
+
+</body>
+</html>
