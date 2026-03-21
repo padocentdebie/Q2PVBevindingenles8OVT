@@ -2,91 +2,86 @@
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PV-Master: NATO Competitie</title>
+    <title>PV-Master: Docenten- & Studentomgeving</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <style>
-        :root { --police-blue: #004481; --gold: #ffcc00; --danger: #dc3545; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #001d3d; color: #333; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        #auth-container, #game-container { background: white; padding: 2rem; border-radius: 12px; width: 100%; max-width: 900px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        :root { --pol-blue: #004481; --gold: #ffcc00; --error: #dc3545; --ok: #28a745; --bg: #001d3d; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #333; margin: 0; padding: 20px; }
+        .container { background: white; padding: 2rem; border-radius: 12px; max-width: 1000px; margin: 0 auto; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        .header { border-bottom: 4px solid var(--pol-blue); margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; }
+        .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab { padding: 10px 20px; cursor: pointer; background: #eee; border-radius: 5px; font-weight: bold; }
+        .tab.active { background: var(--pol-blue); color: white; }
+        .scenario-card { background: #f0f4f8; border-left: 6px solid var(--pol-blue); padding: 15px; margin-bottom: 15px; font-weight: 500; }
+        textarea { width: 100%; height: 150px; padding: 12px; border: 2px solid #ccc; border-radius: 8px; font-family: inherit; font-size: 1rem; box-sizing: border-box; }
+        .grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+        #scoreboard { background: #f9f9f9; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.9rem; }
+        .feedback { margin-top: 10px; padding: 15px; border-radius: 6px; display: none; line-height: 1.4; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .danger { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        button { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-main { background: var(--pol-blue); color: white; }
+        .btn-reset { background: var(--error); color: white; margin-top: 10px; width: 100%; }
         .hidden { display: none; }
-        .header { border-bottom: 3px solid var(--police-blue); margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; }
-        select, input[type="text"] { width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #bdc3c7; border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
-        .grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px; }
-        .scenario { font-weight: bold; font-size: 1.2rem; color: var(--police-blue); margin-bottom: 15px; min-height: 60px; line-height: 1.4; }
-        button { background: var(--police-blue); color: white; border: none; padding: 12px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        button:hover { background: #002344; }
-        .btn-reset { background: var(--danger); font-size: 0.8rem; margin-top: 20px; }
-        #scoreboard { background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #ddd; max-height: 400px; overflow-y: auto; }
-        .score-entry { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; }
-        .correct-msg { color: #28a745; font-weight: bold; margin: 10px 0; }
-        .error-msg { color: var(--danger); font-weight: bold; margin: 10px 0; }
-        .info-box { font-size: 0.85rem; background: #eef4f9; padding: 10px; border-radius: 4px; margin-top: 10px; border-left: 4px solid var(--gold); }
     </style>
 </head>
 <body>
 
-<div id="auth-container">
-    <h2 style="color: var(--police-blue); margin-top: 0;">Meldkamer: Klas-Inzet</h2>
-    <p>Kies je klas en voer je naam in om de PV-training te starten.</p>
-    <label>NAVO Klas:</label>
-    <select id="class-select">
-        <option value="Alfa">Alfa</option>
-        <option value="Bravo">Bravo</option>
-        <option value="Charlie">Charlie</option>
-        <option value="Delta">Delta</option>
-        <option value="Echo">Echo</option>
-        <option value="Foxtrot">Foxtrot</option>
-        <option value="Golf">Golf</option>
-        <option value="Hotel">Hotel</option>
-        <option value="Juliett">Juliett</option>
-    </select>
-    <input type="text" id="student-name" placeholder="voornaam...">
-    <button onclick="login()">Start Oefening</button>
-</div>
-
-<div id="game-container" class="hidden">
+<div class="container">
     <div class="header">
-        <div>
-            <h2 id="display-class" style="margin:0; color: var(--police-blue);">Klas</h2>
-            <span id="display-name" style="color: #666;">Agent</span>
+        <h2 id="main-title">PV-Trainer: Operationeel</h2>
+        <div id="user-tag" style="font-weight: bold; color: var(--pol-blue);">Gereed</div>
+    </div>
+
+    <div class="nav-tabs">
+        <div class="tab active" onclick="switchTab('student')">Studenten-Modus</div>
+        <div class="tab" onclick="switchTab('teacher')">Docenten-Overzicht</div>
+    </div>
+
+    <div id="student-view">
+        <div id="auth-ui">
+            <h3>Aanmelden voor Dienst</h3>
+            <select id="class-select" style="width:100%; padding:10px; margin-bottom:10px;">
+                <option value="Alfa">Alfa</option><option value="Bravo">Bravo</option>
+                <option value="Charlie">Charlie</option><option value="Delta">Delta</option>
+                <option value="Echo">Echo</option><option value="Foxtrot">Foxtrot</option>
+                <option value="Golf">Golf</option><option value="Hotel">Hotel</option>
+                <option value="Juliett">Juliett</option>
+            </select>
+            <input type="text" id="student-name" placeholder="Achternaam..." style="width:100%; padding:10px; margin-bottom:10px; box-sizing:border-box;">
+            <button class="btn-main" onclick="startSession()">Start Training</button>
         </div>
-        <div style="text-align: right;">
-            <div style="font-size: 0.9rem;">Jouw Score</div>
-            <div style="font-size: 2rem; font-weight: bold; color: var(--police-blue);" id="local-score">0</div>
+
+        <div id="game-ui" class="hidden">
+            <div class="grid">
+                <div>
+                    <div id="task-info" style="font-weight: bold; color: #666;">Casus 1/30</div>
+                    <div class="scenario-card" id="scenario-text">Laden...</div>
+                    <textarea id="user-input" placeholder="Noteer de ambtshandeling (OVT, Cautie, Bestanddelen, Tijd)..."></textarea>
+                    <div id="feedback-box" class="feedback"></div>
+                    <button class="btn-main" id="submit-btn" style="margin-top:10px;" onclick="validate()">Verbaal opmaken</button>
+                    <button class="btn-main" id="next-btn" style="margin-top:10px; background:var(--ok);" onclick="nextTask()" class="hidden">Volgende Casus</button>
+                </div>
+                <div>
+                    <h4>Live Klassement</h4>
+                    <div id="scoreboard">Verbinding maken...</div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="grid">
-        <div id="exercise-part">
-            <div id="progress" style="font-weight: bold; color: #666; margin-bottom: 5px;">Casus 1/30</div>
-            <div class="scenario" id="scenario-text">Laden...</div>
-            
-            <input type="text" id="user-input" placeholder="Schrijf je waarneming filmisch (ik-vorm + ovt)..." autocomplete="off">
-            <div id="feedback"></div>
-            
-            <div style="margin-top: 15px;">
-                <button id="submit-btn" onclick="validate()">Verbaal opmaken</button>
-                <button id="next-btn" class="hidden" style="background: #28a745;" onclick="nextQuestion()">Volgende Casus</button>
+    <div id="teacher-view" class="hidden">
+        <h3>Admin Dashboard</h3>
+        <p>Overzicht van de 30 strafbare feiten en vereiste bestanddelen.</p>
+        <div id="casus-list" style="max-height: 400px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; background: #fdfdfd;">
             </div>
-
-            <div class="info-box">
-                <strong>Eisen:</strong> 1: Gebruik OVT 2: Schrijf in de redenen van wetenschap (<em>zag, rook, hoorde, voelde</em>)3: Denk aan de ambtshandelingen ...
-            </div>
-            
-            <button class="btn-reset" onclick="resetGame()">Sessie Resetten</button>
-        </div>
-
-        <div id="scoreboard-part">
-            <h3 style="margin-top:0;">Live Klassement</h3>
-            <div id="scoreboard">Verbinding maken met meldkamer...</div>
-        </div>
+        <button class="btn-reset" onclick="resetAllScores()">RESET ALLE SCORES (Klas-breed)</button>
     </div>
 </div>
 
 <script>
-    // Firebase Configuratie
+    // Jouw Firebase Config
     const firebaseConfig = {
         apiKey: "AIzaSyBEod8zm1jvvkmPbe6cA_SQo2U_esC9yTY",
         authDomain: "aangiftebotje.firebaseapp.com",
@@ -98,71 +93,57 @@
     };
 
     firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
+    const db = firebase.database();
 
-    let currentStudent = "";
-    let currentClass = "";
-    let score = 0;
-    let currentIdx = 0;
+    let student = "", group = "", score = 0, currentIdx = 0;
 
+    // DE 30 SCENARIO'S MET JURIDISCHE EISEN
     const scenarios = [
-        { q: "Je loopt langs een geparkeerde auto en ruikt een sterke wietlucht.", sensor: "rook", target: "auto", must: "wietlucht" },
-        { q: "Tijdens de veiligheidsfouillering voel je een hard voorwerp in de rechter jaszak.", sensor: "voelde", target: "voorwerp", must: "hard" },
-        { q: "Je spreekt de bestuurder aan en ruikt een sterke alcohollucht.", sensor: "rook", target: "adem", must: "alcohol" },
-        { q: "Je ziet dat een personenauto met hoge snelheid door het rode licht rijdt.", sensor: "zag", target: "auto", must: "rood" },
-        { q: "Je voelt een voorwerp dat lijkt op een mes in de broeksband bij de fouillering.", sensor: "voelde", target: "mes", must: "mes" },
-        { q: "Je hoort een luide klap bij een bestelbus die achteruit rijdt.", sensor: "hoorde", target: "bus", must: "klap" },
-        { q: "Je ziet een verdacht persoon over een hek klimmen.", sensor: "zag", target: "persoon", must: "klom" },
-        { q: "Je ruikt een sterke wietlucht wanneer de verdachte zijn zwarte jas opent.", sensor: "rook", target: "jas", must: "wietlucht" },
-        { q: "Je voelt een vloeistof op de mouw van de verdachte tijdens het vastpakken.", sensor: "voelde", target: "vloeistof", must: "nat" },
-        { q: "Je ziet een voertuig wegrijden na een aanrijding.", sensor: "zag", target: "auto", must: "reed" }
-        // ... de overige 20 scenario's worden hier herhaald/aangevuld in de volledige versie
+        { q: "Aanhouding: Fietsendiefstal op straat.", type: "aanhouding", req: ["hield", "2026", "uur", "opzettelijk", "wederrechtelijk", "toe-eigenen", "niet tot antwoorden verplicht", "raadsman"] },
+        { q: "Aanhouding: Mishandeling (vuistslag in gezicht).", type: "aanhouding", req: ["hield", "2026", "uur", "opzettelijk", "mishandelde", "pijn", "niet tot antwoorden verplicht", "raadsman"] },
+        { q: "Veiligheidsfouillering: Verdachte gedraagt zich agressief.", type: "fouillering", req: ["voelde", "onderzocht", "2026", "uur", "veiligheidsfouillering", "gevaar"] },
+        { q: "Aanhouding: Vernieling bushokje.", type: "aanhouding", req: ["hield", "2026", "uur", "opzettelijk", "wederrechtelijk", "vernielde", "niet tot antwoorden verplicht", "raadsman"] },
+        { q: "Aanhouding: Winkeldiefstal (parfum).", type: "aanhouding", req: ["hield", "2026", "uur", "opzettelijk", "wederrechtelijk", "wegnam", "niet tot antwoorden verplicht", "raadsman"] },
+        { q: "Aanhouding: Openlijke geweldpleging tegen auto.", type: "aanhouding", req: ["hield", "2026", "uur", "openlijk", "verenigde krachten", "niet tot antwoorden verplicht", "raadsman"] },
+        { q: "Aanhouding: Belediging ambtenaar in functie.", type: "aanhouding", req: ["hield", "2026", "uur", "opzettelijk", "beledigde", "niet tot antwoorden verplicht", "raadsman"] },
+        { q: "Veiligheidsfouillering: Verdachte van inbraak.", type: "fouillering", req: ["voelde", "2026", "uur", "voorwerp", "veiligheid"] },
+        { q: "Aanhouding: Huisvredebreuk (niet vertrekken).", type: "aanhouding", req: ["hield", "2026", "uur", "wederrechtelijk", "niet verwijderde", "niet tot antwoorden verplicht", "raadsman"] },
+        { q: "Aanhouding: Drugshandel op straat.", type: "aanhouding", req: ["hield", "2026", "uur", "opzettelijk", "verkocht", "niet tot antwoorden verplicht", "raadsman"] }
+        // ... (De rest van de 30 scenario's volgen ditzelfde patroon)
     ];
 
-    // Aanvulling tot 30
+    // Vul aan tot 30 voor de lijst
     while(scenarios.length < 30) {
-        scenarios.push({ q: "Scenario: Je ziet/hoort/voelt/ruikt een onregelmatigheid tijdens de surveillance.", sensor: "zag", target: "auto", must: "onbekend" });
+        scenarios.push({ q: "Extra Casus: Ambtshandeling op locatie.", type: "aanhouding", req: ["hield", "2026", "uur", "niet tot antwoorden verplicht", "raadsman"] });
     }
 
-    function login() {
-        currentClass = document.getElementById('class-select').value;
-        currentStudent = document.getElementById('student-name').value.trim();
-        if(!currentStudent) return alert("Voer je achternaam in.");
-
-        document.getElementById('auth-container').classList.add('hidden');
-        document.getElementById('game-container').classList.remove('hidden');
-        document.getElementById('display-class').innerText = "Klas: " + currentClass;
-        document.getElementById('display-name').innerText = "Agent: " + currentStudent;
-
-        setupScoreboard();
-        loadScenario();
+    function switchTab(tab) {
+        document.getElementById('student-view').classList.toggle('hidden', tab !== 'student');
+        document.getElementById('teacher-view').classList.toggle('hidden', tab !== 'teacher');
+        document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.innerText.toLowerCase().includes(tab)));
+        if(tab === 'teacher') renderTeacherList();
     }
 
-    function setupScoreboard() {
-        database.ref('scores/' + currentClass).on('value', (snapshot) => {
-            const data = snapshot.val();
-            let entries = [];
-            for(let name in data) entries.push({name, score: data[name]});
-            entries.sort((a,b) => b.score - a.score);
-            
-            let html = "";
-            entries.forEach(e => {
-                html += `<div class="score-entry"><span>${e.name}</span><strong>${e.score}</strong></div>`;
-            });
-            document.getElementById('scoreboard').innerHTML = html || "Nog geen meldingen...";
-        });
+    function startSession() {
+        group = document.getElementById('class-select').value;
+        student = document.getElementById('student-name').value.trim();
+        if(!student) return alert("Voer een naam in.");
+        document.getElementById('auth-ui').classList.add('hidden');
+        document.getElementById('game-ui').classList.remove('hidden');
+        document.getElementById('user-tag').innerText = `Agent: ${student} [${group}]`;
+        loadTask();
+        syncScoreboard();
     }
 
-    function loadScenario() {
+    function loadTask() {
         if(currentIdx >= scenarios.length) {
-            document.getElementById('exercise-part').innerHTML = "<h2>Einde Dienst</h2><p>Alle scenario's zijn verwerkt. Je eindrapport staat in het klassement.</p>";
+            document.getElementById('game-ui').innerHTML = "<h3>Dienst voltooid! Bedankt voor je inzet.</h3>";
             return;
         }
-        document.getElementById('progress').innerText = `Casus ${currentIdx + 1}/30`;
+        document.getElementById('task-info').innerText = `Casus ${currentIdx + 1}/30`;
         document.getElementById('scenario-text').innerText = scenarios[currentIdx].q;
         document.getElementById('user-input').value = "";
-        document.getElementById('user-input').disabled = false;
-        document.getElementById('feedback').innerHTML = "";
+        document.getElementById('feedback-box').style.display = "none";
         document.getElementById('next-btn').classList.add('hidden');
         document.getElementById('submit-btn').classList.remove('hidden');
     }
@@ -170,53 +151,53 @@
     function validate() {
         const val = document.getElementById('user-input').value.toLowerCase();
         const s = scenarios[currentIdx];
-        const feedback = document.getElementById('feedback');
+        let missing = s.req.filter(r => !val.includes(r));
+        const hasVTT = ["heb", "ben", "is", "heeft"].some(w => val.includes(w));
+        const fb = document.getElementById('feedback-box');
 
-        const hasIk = val.includes("ik ");
-        const hasOVT = val.includes(s.sensor);
-        const hasVTT = ["heb", "ben", "heeft", "is"].some(w => val.includes(w));
-        
-        let specific = true;
-        if(s.target === "auto" || s.target === "bus") {
-            const colors = ["rood", "blauw", "zwart", "wit", "grijs", "zilver", "groen", "geel"];
-            const detail = ["kenteken", "onbekend", "merk", "type"].some(d => val.includes(d));
-            const color = colors.some(c => val.includes(c));
-            if(!detail && !color) specific = false;
-        }
-
-        if(hasIk && hasOVT && !hasVTT && specific) {
-            score += 10;
-            feedback.innerHTML = "<div class='correct-msg'>Correct! De waarneming is filmisch en specifiek.</div>";
-            document.getElementById('local-score').innerText = score;
-            updateScore();
-            document.getElementById('next-btn').classList.remove('hidden');
+        fb.style.display = "block";
+        if(missing.length === 0 && !hasVTT) {
+            score += 20;
+            fb.className = "feedback success";
+            fb.innerHTML = "<strong>PV Geaccepteerd!</strong> Alle bestanddelen en formele vereisten zijn correct in OVT genoteerd.";
+            db.ref('scores/'+group+'/'+student).set(score);
             document.getElementById('submit-btn').classList.add('hidden');
-            document.getElementById('user-input').disabled = true;
+            document.getElementById('next-btn').classList.remove('hidden');
         } else {
-            let error = "<strong>Rapportage afgekeurd:</strong><br>";
-            if(!hasIk) error += "- Schrijf in de ik-vorm.<br>";
-            if(!hasOVT || hasVTT) error += "- Gebruik de OVT (bijv. 'ik zag' ipv 'ik heb gezien').<br>";
-            if(!specific) error += "- Voertuigdetails ontbreken (kleur/merk/kenteken).<br>";
-            feedback.innerHTML = `<div class='error-msg'>${error}</div>`;
+            fb.className = "feedback danger";
+            let msg = "<strong>Rapport afgekeurd:</strong><br>";
+            if(hasVTT) msg += "- Gebruik OVT (geen 'heb/ben').<br>";
+            if(missing.length > 0) msg += "- Ontbrekende elementen: " + missing.join(", ");
+            fb.innerHTML = msg;
         }
     }
 
-    function updateScore() {
-        database.ref('scores/' + currentClass + '/' + currentStudent).set(score);
+    function nextTask() { currentIdx++; loadTask(); }
+
+    function syncScoreboard() {
+        db.ref('scores/'+group).on('value', snap => {
+            const data = snap.val();
+            let html = "";
+            let arr = [];
+            for(let n in data) arr.push({n, s: data[n]});
+            arr.sort((a,b) => b.s - a.s).forEach(e => {
+                html += `<div style="display:flex; justify-content:space-between; padding:5px; border-bottom:1px solid #eee;"><span>${e.n}</span><strong>${e.s}</strong></div>`;
+            });
+            document.getElementById('scoreboard').innerHTML = html || "Geen scores.";
+        });
     }
 
-    function nextQuestion() {
-        currentIdx++;
-        loadScenario();
+    function renderTeacherList() {
+        let html = "";
+        scenarios.forEach((s, i) => {
+            html += `<div style="padding:10px; border-bottom:1px solid #eee;"><strong>${i+1}. ${s.q}</strong><br><small>Vereist: ${s.req.join(', ')}</small></div>`;
+        });
+        document.getElementById('casus-list').innerHTML = html;
     }
 
-    function resetGame() {
-        if(confirm("Weet je zeker dat je de sessie wilt resetten? Je lokale score gaat naar 0.")) {
-            score = 0;
-            currentIdx = 0;
-            document.getElementById('local-score').innerText = "0";
-            updateScore();
-            loadScenario();
+    function resetAllScores() {
+        if(confirm("Weet je zeker dat je ALLE scores van de klas " + group + " wilt wissen?")) {
+            db.ref('scores/'+group).remove();
         }
     }
 </script>
