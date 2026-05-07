@@ -2,52 +2,57 @@
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
-    <title>PV-Master: Docenten- & Studentomgeving</title>
+    <title>PV-Master: OVT Training</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <style>
         :root { --pol-blue: #004481; --gold: #ffcc00; --error: #dc3545; --ok: #28a745; --bg: #001d3d; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #333; margin: 0; padding: 20px; }
-        .container { background: white; padding: 2rem; border-radius: 12px; max-width: 1000px; margin: 0 auto; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #fff; margin: 0; padding: 20px; }
+        .container { background: white; color: #333; padding: 2rem; border-radius: 12px; max-width: 1100px; margin: 0 auto; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
         .header { border-bottom: 4px solid var(--pol-blue); margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; }
         .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
-        .tab { padding: 10px 20px; cursor: pointer; background: #eee; border-radius: 5px; font-weight: bold; }
+        .tab { padding: 10px 20px; cursor: pointer; background: #eee; border-radius: 5px; font-weight: bold; color: #333; }
         .tab.active { background: var(--pol-blue); color: white; }
-        .scenario-card { background: #f0f4f8; border-left: 6px solid var(--pol-blue); padding: 15px; margin-bottom: 15px; font-weight: 500; }
-        textarea { width: 100%; height: 150px; padding: 12px; border: 2px solid #ccc; border-radius: 8px; font-family: inherit; font-size: 1rem; box-sizing: border-box; }
-        .grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
-        #scoreboard { background: #f9f9f9; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.9rem; }
-        .feedback { margin-top: 10px; padding: 15px; border-radius: 6px; display: none; line-height: 1.4; }
-        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .danger { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-        button { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .scenario-card { background: #e9ecef; border-left: 6px solid var(--gold); padding: 20px; margin-bottom: 15px; font-size: 1.1rem; font-style: italic; }
+        textarea { width: 100%; height: 120px; padding: 12px; border: 2px solid #ccc; border-radius: 8px; font-family: inherit; font-size: 1rem; box-sizing: border-box; resize: none; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .feed-box { background: #f8f9fa; border: 1px solid #ddd; border-radius: 8px; height: 400px; overflow-y: auto; padding: 10px; }
+        .peer-entry { background: white; padding: 10px; margin-bottom: 8px; border-radius: 4px; border: 1px solid #eee; font-size: 0.9rem; }
+        .feedback { margin-top: 10px; padding: 15px; border-radius: 6px; display: none; }
+        .success { background: #d4edda; color: #155724; }
+        .danger { background: #f8d7da; color: #721c24; }
+        button { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.2s; }
         .btn-main { background: var(--pol-blue); color: white; }
-        .btn-reset { background: var(--error); color: white; margin-top: 10px; width: 100%; }
+        .btn-main:hover { opacity: 0.9; }
+        .btn-next { background: var(--ok); color: white; width: 100%; margin-top: 10px; }
+        .btn-reset { background: var(--error); color: white; margin-top: 20px; }
         .hidden { display: none; }
+        .label-ovt { color: var(--pol-blue); font-weight: bold; font-size: 0.8rem; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header">
-        <h2 id="main-title">PV-Trainer: Operationeel</h2>
-        <div id="user-tag" style="font-weight: bold; color: var(--pol-blue);">Gereed</div>
+        <h2 id="main-title">PV-Trainer: <span style="color: var(--pol-blue)">OVT Meesterschap</span></h2>
+        <div id="user-tag" style="font-weight: bold;">Stand-by</div>
     </div>
 
     <div class="nav-tabs">
-        <div class="tab active" onclick="switchTab('student')">Studenten-Modus</div>
-        <div class="tab" onclick="switchTab('teacher')">Docenten-Overzicht</div>
+        <div class="tab active" onclick="switchTab('student')">Student</div>
+        <div class="tab" onclick="switchTab('teacher')">Docent</div>
     </div>
 
     <div id="student-view">
         <div id="auth-ui">
-            <h3>Aanmelden voor Dienst</h3>
+            <h3>Meld je aan voor de briefing</h3>
             <select id="class-select" style="width:100%; padding:10px; margin-bottom:10px;">
                 <option value="Alfa">Alfa</option><option value="Bravo">Bravo</option>
                 <option value="Charlie">Charlie</option><option value="Delta">Delta</option>
                 <option value="Echo">Echo</option><option value="Foxtrot">Foxtrot</option>
                 <option value="Golf">Golf</option><option value="Hotel">Hotel</option>
-                <option value="Juliett">Juliett</option>
+                <option value="Juliet">Juliet</option><option value="Kilo">Kilo</option>
+                <option value="Lima">Lima</option><option value="Mike">Mike</option>
             </select>
             <input type="text" id="student-name" placeholder="Achternaam..." style="width:100%; padding:10px; margin-bottom:10px; box-sizing:border-box;">
             <button class="btn-main" onclick="startSession()">Start Training</button>
@@ -56,32 +61,34 @@
         <div id="game-ui" class="hidden">
             <div class="grid">
                 <div>
-                    <div id="task-info" style="font-weight: bold; color: #666;">Casus 1/30</div>
-                    <div class="scenario-card" id="scenario-text">Laden...</div>
-                    <textarea id="user-input" placeholder="Noteer de ambtshandeling (OVT, Cautie, Bestanddelen, Tijd)..."></textarea>
+                    <div id="task-info" class="label-ovt">Wachten op docent...</div>
+                    <div class="scenario-card" id="scenario-text">De docent start zo de volgende casus.</div>
+                    <textarea id="user-input" placeholder="Zet de bovenstaande tekst om in een filmisch proces-verbaal (OVT)..." oninput="sendLiveUpdate()"></textarea>
                     <div id="feedback-box" class="feedback"></div>
-                    <button class="btn-main" id="submit-btn" style="margin-top:10px;" onclick="validate()">Verbaal opmaken</button>
-                    <button class="btn-main" id="next-btn" style="margin-top:10px; background:var(--ok);" onclick="nextTask()" class="hidden">Volgende Casus</button>
+                    <button class="btn-main" id="submit-btn" style="margin-top:10px; width: 100%;" onclick="validate()">Verbaal Definitief Inleveren</button>
                 </div>
                 <div>
-                    <h4>Live Klassement</h4>
-                    <div id="scoreboard">Verbinding maken...</div>
+                    <h4 style="margin-top:0">Live Feed (Geef elkaar feedback)</h4>
+                    <div id="peer-feed" class="feed-box">Iedereen is nog aan het schrijven...</div>
                 </div>
             </div>
         </div>
     </div>
 
     <div id="teacher-view" class="hidden">
-        <h3>Admin Dashboard</h3>
-        <p>Overzicht van de 30 strafbare feiten en vereiste bestanddelen.</p>
-        <div id="casus-list" style="max-height: 400px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; background: #fdfdfd;">
-            </div>
-        <button class="btn-reset" onclick="resetAllScores()">RESET ALLE SCORES (Klas-breed)</button>
+        <h3>Docenten Dashboard</h3>
+        <p>Bedien welke casus de klas nu ziet:</p>
+        <div id="teacher-controls">
+            <button class="btn-main" onclick="changeTask(-1)">Vorige</button>
+            <span id="current-task-num" style="font-weight: bold; margin: 0 15px;">Casus 1</span>
+            <button class="btn-main" onclick="changeTask(1)">Volgende Casus</button>
+        </div>
+        <div id="casus-preview" style="margin-top:20px; padding:15px; background:#f0f4f8; border-radius:8px;"></div>
+        <button class="btn-reset" onclick="resetClass()">Wis alle studentgegevens van deze klas</button>
     </div>
 </div>
 
 <script>
-    // Jouw Firebase Config
     const firebaseConfig = {
         apiKey: "AIzaSyBEod8zm1jvvkmPbe6cA_SQo2U_esC9yTY",
         authDomain: "aangiftebotje.firebaseapp.com",
@@ -95,109 +102,132 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    let student = "", group = "", score = 0, currentIdx = 0;
+    let student = "", group = "", currentIdx = 0;
 
-    // DE 30 SCENARIO'S MET JURIDISCHE EISEN
+    // SCENARIO'S IN TEGENWOORDIGE TIJD
     const scenarios = [
-        { q: "Aanhouding: Fietsendiefstal op straat.", type: "aanhouding", req: ["hield", "2026", "uur", "opzettelijk", "wederrechtelijk", "toe-eigenen", "niet tot antwoorden verplicht", "raadsman"] },
-        { q: "Aanhouding: Mishandeling (vuistslag in gezicht).", type: "aanhouding", req: ["hield", "2026", "uur", "opzettelijk", "mishandelde", "pijn", "niet tot antwoorden verplicht", "raadsman"] },
-        { q: "Veiligheidsfouillering: Verdachte gedraagt zich agressief.", type: "fouillering", req: ["voelde", "onderzocht", "2026", "uur", "veiligheidsfouillering", "gevaar"] },
-        { q: "Aanhouding: Vernieling bushokje.", type: "aanhouding", req: ["hield", "2026", "uur", "opzettelijk", "wederrechtelijk", "vernielde", "niet tot antwoorden verplicht", "raadsman"] },
-        { q: "Aanhouding: Winkeldiefstal (parfum).", type: "aanhouding", req: ["hield", "2026", "uur", "opzettelijk", "wederrechtelijk", "wegnam", "niet tot antwoorden verplicht", "raadsman"] },
-        { q: "Aanhouding: Openlijke geweldpleging tegen auto.", type: "aanhouding", req: ["hield", "2026", "uur", "openlijk", "verenigde krachten", "niet tot antwoorden verplicht", "raadsman"] },
-        { q: "Aanhouding: Belediging ambtenaar in functie.", type: "aanhouding", req: ["hield", "2026", "uur", "opzettelijk", "beledigde", "niet tot antwoorden verplicht", "raadsman"] },
-        { q: "Veiligheidsfouillering: Verdachte van inbraak.", type: "fouillering", req: ["voelde", "2026", "uur", "voorwerp", "veiligheid"] },
-        { q: "Aanhouding: Huisvredebreuk (niet vertrekken).", type: "aanhouding", req: ["hield", "2026", "uur", "wederrechtelijk", "niet verwijderde", "niet tot antwoorden verplicht", "raadsman"] },
-        { q: "Aanhouding: Drugshandel op straat.", type: "aanhouding", req: ["hield", "2026", "uur", "opzettelijk", "verkocht", "niet tot antwoorden verplicht", "raadsman"] }
-        // ... (De rest van de 30 scenario's volgen ditzelfde patroon)
+        { q: "Ik hou de verdachte aan op de Hoogstraat. Ik zeg dat hij niet tot antwoorden verplicht is en recht heeft op een advocaat.", req: ["hield", "zeide", "verplicht", "raadsman"] },
+        { q: "Ik zie dat de man de ruit van de bushok inslaat. Ik ren naar hem toe en breng hem naar de grond.", req: ["zag", "insloeg", "rende", "bracht"] },
+        { q: "Tijdens de controle ruik ik een sterke henneplucht. Ik verzoek de bestuurder om de kofferbak te openen.", req: ["rook", "verzocht", "opende"] },
+        { q: "De verdachte scheldt mij uit voor 'pannenkoek'. Ik voel mij in mijn eer aangetast en hou hem aan voor belediging.", req: ["schold", "voelde", "hield"] },
+        { q: "Ik voel aan de buitenkant van de kleding van de verdachte. Ik zoek naar wapens voor mijn eigen veiligheid.", req: ["voelde", "zocht", "veiligheid"] },
+        { q: "Ik zie dat de vrouw een parfumflesje in haar tas stopt zonder te betalen. Ik spreek haar aan bij de uitgang.", req: ["zag", "stopte", "sprak"] },
+        { q: "De man geeft de omstander een harde klap met zijn vlakke hand. Het slachtoffer heeft veel pijn.", req: ["gaf", "had", "pijn"] },
+        { q: "Ik vorder de man om weg te gaan bij het evenement. Hij negeert mijn bevel en blijft staan.", req: ["vorderde", "negeerde", "bleef"] },
+        { q: "Ik tref de inbreker aan in de woning. Hij heeft een schroevendraaier in zijn linkerhand.", req: ["trof", "had"] },
+        { q: "Ik hoor de verdachte zeggen dat hij de auto heeft gestolen. Ik noteer zijn verklaring direct.", req: ["hoorde", "noterde", "verklaarde"] }
     ];
-
-    // Vul aan tot 30 voor de lijst
-    while(scenarios.length < 30) {
-        scenarios.push({ q: "Extra Casus: Ambtshandeling op locatie.", type: "aanhouding", req: ["hield", "2026", "uur", "niet tot antwoorden verplicht", "raadsman"] });
-    }
 
     function switchTab(tab) {
         document.getElementById('student-view').classList.toggle('hidden', tab !== 'student');
         document.getElementById('teacher-view').classList.toggle('hidden', tab !== 'teacher');
-        document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.innerText.toLowerCase().includes(tab)));
-        if(tab === 'teacher') renderTeacherList();
+        document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.innerText.toLowerCase() === tab));
+        if(tab === 'teacher') updateTeacherPreview();
     }
 
     function startSession() {
         group = document.getElementById('class-select').value;
         student = document.getElementById('student-name').value.trim();
-        if(!student) return alert("Voer een naam in.");
+        if(!student) return alert("Voer je achternaam in.");
+        
         document.getElementById('auth-ui').classList.add('hidden');
         document.getElementById('game-ui').classList.remove('hidden');
-        document.getElementById('user-tag').innerText = `Agent: ${student} [${group}]`;
-        loadTask();
-        syncScoreboard();
+        document.getElementById('user-tag').innerText = `Agent: ${student} (${group})`;
+
+        // Luister naar de docent voor de huidige casus
+        db.ref(`session/${group}/current`).on('value', snap => {
+            currentIdx = snap.val() || 0;
+            loadTask();
+        });
+
+        // Luister naar de live feed van klasgenoten
+        db.ref(`live/${group}`).on('value', snap => {
+            renderPeerFeed(snap.val());
+        });
     }
 
     function loadTask() {
-        if(currentIdx >= scenarios.length) {
-            document.getElementById('game-ui').innerHTML = "<h3>Dienst voltooid! Bedankt voor je inzet.</h3>";
-            return;
+        const s = scenarios[currentIdx];
+        document.getElementById('task-info').innerText = `Casus ${currentIdx + 1} (Filmische OVT vereist)`;
+        document.getElementById('scenario-text').innerText = s.q;
+        // We resetten het invoerveld NIET automatisch om type-hinder te voorkomen bij sync, 
+        // maar bij een nieuwe casus is het wel handig:
+        if(window.lastLoadedIdx !== currentIdx) {
+            document.getElementById('user-input').value = "";
+            document.getElementById('feedback-box').style.display = "none";
+            window.lastLoadedIdx = currentIdx;
         }
-        document.getElementById('task-info').innerText = `Casus ${currentIdx + 1}/30`;
-        document.getElementById('scenario-text').innerText = scenarios[currentIdx].q;
-        document.getElementById('user-input').value = "";
-        document.getElementById('feedback-box').style.display = "none";
-        document.getElementById('next-btn').classList.add('hidden');
-        document.getElementById('submit-btn').classList.remove('hidden');
+    }
+
+    function sendLiveUpdate() {
+        const text = document.getElementById('user-input').value;
+        if(student && group) {
+            db.ref(`live/${group}/${student}`).set({
+                text: text,
+                timestamp: Date.now()
+            });
+        }
+    }
+
+    function renderPeerFeed(data) {
+        const container = document.getElementById('peer-feed');
+        let html = "";
+        for(let name in data) {
+            if(name === student) continue;
+            html += `<div class="peer-entry"><strong>${name}:</strong><br>${data[name].text}</div>`;
+        }
+        container.innerHTML = html || "Wachten op klasgenoten...";
     }
 
     function validate() {
         const val = document.getElementById('user-input').value.toLowerCase();
         const s = scenarios[currentIdx];
+        
+        // Check op verboden hulpwerkwoorden (VTT/TT indicatoren)
+        const vttWords = ["heb ", "ben ", "is ", "heeft ", "wordt ", "worden "];
+        const hasVTT = vttWords.some(w => val.includes(w));
+        
         let missing = s.req.filter(r => !val.includes(r));
-        const hasVTT = ["heb", "ben", "is", "heeft"].some(w => val.includes(w));
         const fb = document.getElementById('feedback-box');
-
         fb.style.display = "block";
+
         if(missing.length === 0 && !hasVTT) {
-            score += 20;
             fb.className = "feedback success";
-            fb.innerHTML = "<strong>PV Geaccepteerd!</strong> Alle bestanddelen en formele vereisten zijn correct in OVT genoteerd.";
-            db.ref('scores/'+group+'/'+student).set(score);
-            document.getElementById('submit-btn').classList.add('hidden');
-            document.getElementById('next-btn').classList.remove('hidden');
+            fb.innerHTML = "<strong>Correct!</strong> Je hebt de casus succesvol omgezet in een filmisch proces-verbaal (OVT).";
         } else {
             fb.className = "feedback danger";
-            let msg = "<strong>Rapport afgekeurd:</strong><br>";
-            if(hasVTT) msg += "- Gebruik OVT (geen 'heb/ben').<br>";
-            if(missing.length > 0) msg += "- Ontbrekende elementen: " + missing.join(", ");
+            let msg = "<strong>Nog niet akkoord:</strong><br>";
+            if(hasVTT) msg += "- Je gebruikt de tegenwoordige of voltooide tijd (heb/is/wordt). Gebruik alleen OVT.<br>";
+            if(missing.length > 0) msg += "- Mis de kernwoorden in OVT: " + missing.join(", ") + ".";
             fb.innerHTML = msg;
         }
     }
 
-    function nextTask() { currentIdx++; loadTask(); }
+    // DOCENT LOGICA
+    function changeTask(dir) {
+        group = document.getElementById('class-select').value;
+        let newIdx = currentIdx + dir;
+        if(newIdx < 0) newIdx = 0;
+        if(newIdx >= scenarios.length) newIdx = scenarios.length - 1;
+        
+        db.ref(`session/${group}/current`).set(newIdx);
+        updateTeacherPreview();
+    }
 
-    function syncScoreboard() {
-        db.ref('scores/'+group).on('value', snap => {
-            const data = snap.val();
-            let html = "";
-            let arr = [];
-            for(let n in data) arr.push({n, s: data[n]});
-            arr.sort((a,b) => b.s - a.s).forEach(e => {
-                html += `<div style="display:flex; justify-content:space-between; padding:5px; border-bottom:1px solid #eee;"><span>${e.n}</span><strong>${e.s}</strong></div>`;
-            });
-            document.getElementById('scoreboard').innerHTML = html || "Geen scores.";
+    function updateTeacherPreview() {
+        group = document.getElementById('class-select').value;
+        db.ref(`session/${group}/current`).once('value', snap => {
+            const idx = snap.val() || 0;
+            document.getElementById('current-task-num').innerText = `Casus ${idx + 1}`;
+            document.getElementById('casus-preview').innerText = scenarios[idx].q;
         });
     }
 
-    function renderTeacherList() {
-        let html = "";
-        scenarios.forEach((s, i) => {
-            html += `<div style="padding:10px; border-bottom:1px solid #eee;"><strong>${i+1}. ${s.q}</strong><br><small>Vereist: ${s.req.join(', ')}</small></div>`;
-        });
-        document.getElementById('casus-list').innerHTML = html;
-    }
-
-    function resetAllScores() {
-        if(confirm("Weet je zeker dat je ALLE scores van de klas " + group + " wilt wissen?")) {
-            db.ref('scores/'+group).remove();
+    function resetClass() {
+        group = document.getElementById('class-select').value;
+        if(confirm(`Weet je zeker dat je alle live-teksten van klas ${group} wilt wissen?`)) {
+            db.ref(`live/${group}`).remove();
+            db.ref(`session/${group}`).set({current: 0});
         }
     }
 </script>
